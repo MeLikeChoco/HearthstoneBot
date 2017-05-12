@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "HearthstoneBot": {
-      "commandName": "Project",
-      "commandLineArgs": "True"
-    }
-  }
-}

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using HearthstoneBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -88,6 +89,8 @@ namespace HearthstoneBot.Core
 
             _services = new ServiceCollection()
                 .BuildServiceProvider();
+
+            Cache.InitializeCache();
 
             return Task.CompletedTask;
 

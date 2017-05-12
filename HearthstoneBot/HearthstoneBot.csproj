@@ -6,8 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Dapper.Contrib" Version="1.50.0" />
     <PackageReference Include="Discord.Addons.InteractiveCommands" Version="1.2.2" />
     <PackageReference Include="Discord.Net" Version="1.0.0-rc3-00742" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.0-preview1-final" />
+    <PackageReference Include="morelinq" Version="2.4.1" />
     <PackageReference Include="WS4NetCore" Version="1.0.0-a" />
   </ItemGroup>
 

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using HearthstoneBot.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,7 +70,9 @@ namespace HearthstoneBot.Core
 
             _client.Connected += Events.StartServices;
             _client.MessageReceived += Events.CommandHandler;
+            _client.MessageReceived += Chat.CardSearch;
             _client.Ready += Events.SetGame;
+            _client.JoinedGuild += Settings.CreateSettings;
 
         }
 

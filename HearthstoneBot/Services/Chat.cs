@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using System.Text.RegularExpressions;
 using MoreLinq;
 using Discord;
+using HearthstoneBot.Objects;
 
 namespace HearthstoneBot.Services
 {
@@ -15,7 +16,7 @@ namespace HearthstoneBot.Services
 
         public const string Pattern = "<.+?>";
 
-        public static Task CardSearch(SocketMessage message)
+        public static async Task CardSearch(SocketMessage message)
         {
 
             var matches = Regex.Matches(message.Content, Pattern);
@@ -23,16 +24,53 @@ namespace HearthstoneBot.Services
             if (matches.Count < 4 && matches.Count != 0)
             {
 
-                foreach (var match in matches.OfType<Match>())
+                using (message.Channel.EnterTypingState())
                 {
 
-                    var card = match.Value;
-                    card = card.Substring(1, card.Length - 2).ToLower();
+                    bool isMinimal;
 
-                    if (Cache.EmbedsCache.TryGetValue(card, out EmbedBuilder embed))
+                    if (message.Channel is SocketGuildChannel)
                     {
 
-                        
+                        var guild = (message.Channel as SocketGuildChannel).Guild;
+                        isMinimal = Settings.GetMinimalSetting(guild.Id);
+
+                    }
+                    else
+                        isMinimal = false;
+
+                    foreach (var match in matches.OfType<Match>())
+                    {
+
+                        var card = match.Value;
+                        card = card.Substring(1, card.Length - 2).ToLower();
+
+                        var embed = Cache.EmbedsCache.FirstOrDefault(kv => kv.Key.Name.ToLower() == card).Value;
+
+                        if (embed != null)
+                        {
+
+                            await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
+                            return;
+
+                        }
+                        else
+                        {
+
+                            if (!Cache.Cards.TryGetValue(card, out Card closestCard))
+                            {
+
+                                var cardArray = card.Split(' ');
+                                closestCard = Cache.Cards.AsParallel().FirstOrDefault(kv => cardArray.All(str => kv.Key.Contains(str))).Value;
+
+                                if (closestCard == null)
+                                    closestCard = Cache.Cards.AsParallel().MinBy(kv => Compute(kv.Key, card)).Value;
+
+                            }
+
+                            await PrintToChat(closestCard, message.Channel, isMinimal);
+
+                        }
 
                     }
 
@@ -40,7 +78,101 @@ namespace HearthstoneBot.Services
 
             }
 
-            return Task.CompletedTask;
+        }
+
+        public static async Task PrintToChat(Card card, ISocketMessageChannel channel, bool isMinimal)
+        {
+
+            var author = new EmbedAuthorBuilder()
+                .WithIconUrl("https://cdn.iconverticons.com/files/png/e374004e6f5ac18b_256x256.png")
+                .WithUrl("http://us.battle.net/hearthstone/en/")
+                .WithName("Hearthstone");
+
+            var footer = new EmbedFooterBuilder()
+                .WithIconUrl("http://i.imgur.com/zz1Bcek.png")
+                .WithText("Brought to you by The One and Only");
+
+            var body = new EmbedBuilder
+            {
+
+                Author = author,
+                Color = GetColor(card.Class),
+                ImageUrl = card.GoldImage,
+                Url = card.Url,
+                ThumbnailUrl = card.RegularImage,
+                Title = card.Name,
+                Footer = footer,
+
+            };
+
+            body.Description = $"**Set:** {card.Set}\n" +
+                $"**Type:** {card.Type}\n" +
+                $"**Class:** {card.Class}\n" +
+                $"**Rarity:** {card.Rarity}\n" +
+                $"**Mana Cost:** {card.ManaCost}\n" +
+                $"**Attack:** {card.Attack}\n" +
+                $"**Health:** {card.Health}\n" +
+                $"**Durability:** {card.Durability}";
+
+            body.AddField("Description", card.Description ?? "N/A");
+            body.AddField("Lore", card.Lore ?? "N/A");
+            body.AddField("Abilities", string.Join(", ", card.Abilities ?? new string[] { "None" }));
+            body.AddField("Tags", string.Join(", ", card.Tags ?? new string[] { "None" }));
+            body.AddField("Artist", card.Artist ?? "None");
+
+            Cache.AddToEmbedsCache(card, body);
+
+            await channel.SendMessageAsync("", embed: CleanEmbed(body, isMinimal));
+
+        }
+
+        public static Color GetColor(string cardClass)
+        {
+
+            switch (cardClass)
+            {
+
+                case "Hunter":
+                    return new Color(102, 102, 102);
+                case "Priest":
+                    return new Color(167, 174, 182);
+                case "Warlock":
+                    return new Color(78, 50, 88);
+                case "Warrior":
+                    return new Color(87, 97, 88);
+                case "Paladin":
+                    return new Color(183, 137, 60);
+                case "Druid":
+                    return new Color(104, 59, 40);
+                case "Mage":
+                    return new Color(107, 118, 163);
+                case "Shaman":
+                    return new Color(50, 53, 96);
+                case "Rogue":
+                    return new Color(55, 54, 60);
+                default:
+                    return new Color(107, 86, 75);
+
+
+            }
+
+        }
+
+        public static EmbedBuilder CleanEmbed(EmbedBuilder embedToClean, bool isMinimal)
+        {
+
+            if (isMinimal && embedToClean.ImageUrl != null)
+            {
+
+                var image = embedToClean.ImageUrl;
+                embedToClean.ImageUrl = null;
+
+                if (embedToClean.ThumbnailUrl == null)
+                    embedToClean.ThumbnailUrl = image;
+
+            }
+
+            return embedToClean;
 
         }
 
@@ -49,7 +181,7 @@ namespace HearthstoneBot.Services
         /// </summary>
         /// <param name="s"></param>
         /// <param name="t"></param>
-        /// <returns></returns>
+        /// <returns>int</returns>
         public static int Compute(string s, string t)
         {
             int n = s.Length;

@@ -42,14 +42,15 @@ namespace HearthstoneBot.Core
             });
             _commands = new CommandService(new CommandServiceConfig
             {
-
+                                
                 DefaultRunMode = RunMode.Async,
-                LogLevel = LogSeverity.Verbose,                
+                LogLevel = LogSeverity.Verbose,           
 
             });
 
             InitializeLogging();
             InitializeServices();
+            Events.Initialize(_client, _commands);
 
             await LoginAndConnect();
 

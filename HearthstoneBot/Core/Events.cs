@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,11 +39,16 @@ namespace HearthstoneBot.Core
                 return;
 
             var argPos = 0;
-            var prefix = "h^";
+            string prefix;
+
+            if (message.Channel is SocketDMChannel)
+                prefix = "h^";
+            else
+                prefix = Settings.GetPrefix((message.Channel as SocketGuildChannel).Guild.Id);
 
             //if message is a command and doesnt just contain the prefix
-            if (message.HasStringPrefix(prefix, ref argPos) && 
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos) && 
+            if ((message.HasStringPrefix(prefix, ref argPos) || 
+                message.HasMentionPrefix(_client.CurrentUser, ref argPos)) && 
                 message.Content.Trim() != prefix)
             {
 
@@ -51,19 +57,19 @@ namespace HearthstoneBot.Core
                 if(message.Channel is SocketDMChannel)
                 {
 
-                    AltConsole.Print("Verbose", "Command", $"{(message.Channel as SocketDMChannel).Recipient.Username}");
-                    AltConsole.Print("Verbose", "Command", $"{message.Content}");
+                    AltConsole.Print("Command", "DM", $"{(message.Channel as SocketDMChannel).Recipient.Username}");
+                    AltConsole.Print("Command", "DM", $"{message.Content}");
 
                 }
                 else
                 {
 
-                    AltConsole.Print("Verbose", "Command", $"{(message.Channel as SocketGuildChannel).Guild.Name}");
-                    AltConsole.Print("Verbose", "Command", $"{message.Content}");
+                    AltConsole.Print("Command", "Guild", $"{(message.Channel as SocketGuildChannel).Guild.Name}");
+                    AltConsole.Print("Command", "Guild", $"{message.Content}");
 
                 }
 
-                IResult result = await _commands.ExecuteAsync(context, argPos, _services);
+                var result = await _commands.ExecuteAsync(context, argPos, _services);
 
                 if (!result.IsSuccess)
                 {
@@ -84,15 +90,16 @@ namespace HearthstoneBot.Core
 
         }
 
-        public static Task StartServices()
+        public static async Task StartServices()
         {
 
             _services = new ServiceCollection()
                 .BuildServiceProvider();
 
             Cache.InitializeCache();
+            await Settings.InitializeSettings();
 
-            return Task.CompletedTask;
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
 
         }
 

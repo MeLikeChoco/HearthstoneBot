@@ -61,10 +61,31 @@ namespace HearthstoneBot.Services
                             {
 
                                 var cardArray = card.Split(' ');
-                                closestCard = Cache.Cards.AsParallel().FirstOrDefault(kv => cardArray.All(str => kv.Key.Contains(str))).Value;
+                                closestCard = Cache.Cards.FirstOrDefault(kv => cardArray.All(str => kv.Key.Contains(str))).Value;
 
                                 if (closestCard == null)
-                                    closestCard = Cache.Cards.AsParallel().MinBy(kv => Compute(kv.Key, card)).Value;
+                                {
+
+                                    closestCard = Cache.Cards.MinBy(kv => Compute(kv.Key, card)).Value;
+                                    embed = Cache.EmbedsCache.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
+
+                                    if (embed != null)
+                                    {
+
+                                        await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
+                                        return;
+
+                                    }
+
+                                }
+                                else
+                                {
+
+                                    embed = Cache.EmbedsCache.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
+                                    await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
+                                    return;
+
+                                }
 
                             }
 

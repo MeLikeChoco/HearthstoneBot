@@ -14,7 +14,7 @@ namespace HearthstoneBot.Services
     public class Chat
     {
 
-        public const string Pattern = "<.+?>";
+        public const string Pattern = "<.+?>", Check = "N/A";
 
         public static async Task CardSearch(SocketMessage message)
         {
@@ -45,7 +45,7 @@ namespace HearthstoneBot.Services
                         var card = match.Value;
                         card = card.Substring(1, card.Length - 2).ToLower();
 
-                        var embed = Cache.EmbedsCache.FirstOrDefault(kv => kv.Key.Name.ToLower() == card).Value;
+                        var embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Name.ToLower() == card).Value;
 
                         if (embed != null)
                         {
@@ -67,7 +67,7 @@ namespace HearthstoneBot.Services
                                 {
 
                                     closestCard = Cache.Cards.MinBy(kv => Compute(kv.Key, card)).Value;
-                                    embed = Cache.EmbedsCache.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
+                                    embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
 
                                     if (embed != null)
                                     {
@@ -81,7 +81,7 @@ namespace HearthstoneBot.Services
                                 else
                                 {
 
-                                    embed = Cache.EmbedsCache.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
+                                    embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
                                     await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
                                     return;
 
@@ -89,7 +89,7 @@ namespace HearthstoneBot.Services
 
                             }
 
-                            await PrintToChat(closestCard, message.Channel, isMinimal);
+                            await PrintCardToChat(closestCard, message.Channel, isMinimal);
 
                         }
 
@@ -101,7 +101,7 @@ namespace HearthstoneBot.Services
 
         }
 
-        public static async Task PrintToChat(Card card, ISocketMessageChannel channel, bool isMinimal)
+        public static async Task PrintCardToChat(Card card, ISocketMessageChannel channel, bool isMinimal)
         {
 
             var author = new EmbedAuthorBuilder()
@@ -126,24 +126,53 @@ namespace HearthstoneBot.Services
 
             };
 
-            body.Description = $"**Set:** {card.Set}\n" +
-                $"**Type:** {card.Type}\n" +
-                $"**Class:** {card.Class}\n" +
-                $"**Rarity:** {card.Rarity}\n" +
-                $"**Mana Cost:** {card.ManaCost}\n" +
-                $"**Attack:** {card.Attack}\n" +
-                $"**Health:** {card.Health}\n" +
-                $"**Durability:** {card.Durability}";
+            body.Description = GenerateDescription(card);
 
-            body.AddField("Description", card.Description ?? "N/A");
-            body.AddField("Lore", card.Lore ?? "N/A");
-            body.AddField("Abilities", string.Join(", ", card.Abilities ?? new string[] { "None" }));
-            body.AddField("Tags", string.Join(", ", card.Tags ?? new string[] { "None" }));
+            if (!string.IsNullOrEmpty(card.Description))
+                body.AddField("Description", card.Description);
+
+            if (!string.IsNullOrEmpty(card.Lore))
+                body.AddField("Lore", card.Lore ?? "N/A");
+
+            if (card.Abilities != null)
+                body.AddField("Abilities", string.Join(", ", card.Abilities));
+
+            if (card.Tags != null)
+                body.AddField("Tags", string.Join(", ", card.Tags));
+
             body.AddField("Artist", card.Artist ?? "None");
 
             Cache.AddToEmbedsCache(card, body);
 
             await channel.SendMessageAsync("", embed: CleanEmbed(body, isMinimal));
+
+        }
+
+        public static string GenerateDescription(Card card)
+        {
+            
+            var builder = new StringBuilder($"**Set:** {card.Set}\n" +
+                $"**Type:** {card.Type}\n");
+
+            if (card.Class != Check)
+                builder.AppendLine($"**Class:** {card.Class}");
+
+            if (card.Rarity != Check)
+                builder.AppendLine($"**Rarity:** {card.Rarity}");
+
+            if (card.ManaCost != Check)
+                builder.AppendLine($"**Mana Cost:** {card.ManaCost}");
+
+            if (card.Attack != Check)
+                builder.AppendLine($"**Attack:** {card.Attack}");
+
+            if (card.Health != Check)
+                builder.AppendLine($"**Health:** {card.Health}");
+
+            if (card.Durability != Check)
+                builder.AppendLine($"**Durability:** {card.Durability}");
+
+            return builder.ToString();
 
         }
 

@@ -31,7 +31,22 @@ namespace HearthstoneBot.Modules
                 await Settings.SetPrefix(Context.Guild.Id, prefix);
                 await ReplyAsync("Prefix has been set to: " + prefix);
 
-            }            
+            }
+
+        }
+
+        [Command("minimal")]
+        [Summary("Sets minimal settings")]
+        public async Task MinimalCommand(string maybeMinimal)
+        {
+
+            if (bool.TryParse(maybeMinimal, out var isMinimal))
+            {
+
+                await Settings.SetMinimalSetting(Context.Guild.Id, isMinimal);
+                await ReplyAsync("Minimal setting has been set to: " + maybeMinimal);
+
+            }
 
         }
 

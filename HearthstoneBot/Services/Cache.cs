@@ -18,7 +18,7 @@ namespace HearthstoneBot.Services
         private const string DbPath = "Database/Database.json";
 
         public static ConcurrentDictionary<string, Card> Cards { get; private set; }
-        public static ConcurrentDictionary<Card, EmbedBuilder> EmbedsCache { get; set; }
+        public static ConcurrentDictionary<Card, EmbedBuilder> Embeds { get; set; }
 
         public static void InitializeCache()
         {
@@ -28,7 +28,7 @@ namespace HearthstoneBot.Services
             var json = File.ReadAllText(DbPath);
             var cards = JsonConvert.DeserializeObject<List<Card>>(json);
             Cards = new ConcurrentDictionary<string, Card>();
-            EmbedsCache = new ConcurrentDictionary<Card, EmbedBuilder>();
+            Embeds = new ConcurrentDictionary<Card, EmbedBuilder>();
 
             Parallel.ForEach(cards, card =>
             {
@@ -43,7 +43,7 @@ namespace HearthstoneBot.Services
         }
 
         public static void AddToEmbedsCache(Card card, EmbedBuilder embed)
-            => EmbedsCache.TryAdd(card, embed);
+            => Embeds.TryAdd(card, embed);
 
     }
 }

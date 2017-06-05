@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using HearthstoneBot.Objects;
 using HearthstoneBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -98,6 +99,7 @@ namespace HearthstoneBot.Core
 
             Cache.InitializeCache();
             await Settings.InitializeSettings();
+            HStats.Initialize();
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
 

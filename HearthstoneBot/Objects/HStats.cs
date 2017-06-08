@@ -1,4 +1,5 @@
-﻿using HearthstoneBot.Services;
+﻿using HearthstoneBot.Core;
+using HearthstoneBot.Services;
 using MoreLinq;
 using System;
 using System.Collections.Concurrent;
@@ -19,7 +20,7 @@ namespace HearthstoneBot.Objects
         private static int _collectibleCount = 0;
         private static int _uncollectibleCount = 0;
 
-        //im not going to edit every variable to _lowerCase instead of UpperCase
+        //im not going to edit every variable to _lowerCase instead of _UpperCase
         private static int _DruidCardCount = 0;
         private static int _HunterCardCount = 0;
         private static int _MageCardCount = 0;
@@ -108,21 +109,21 @@ namespace HearthstoneBot.Objects
         public static void Initialize()
         {
 
-            var cards = Cache.Cards;
+            AltConsole.Print("Objects", "HStats", "Initializing HStats...");
+
+            var cards = Cache.CardObjects;
 
             Parallel.ForEach(cards, card =>
-            {
+            {                
 
-                var value = card.Value;
-
-                switch (value.Collectability)
+                switch (card.Collectability)
                 {
 
                     case CollectableStatus.Collectible:
                         Interlocked.Increment(ref _collectibleCount);
                         break;
                     case CollectableStatus.Uncollectible:
-                        if (value.Set.ToLower() != "cheat")
+                        if (card.Set.ToLower() != "cheat")
                         {
                             Interlocked.Increment(ref _uncollectibleCount);
                         }
@@ -130,7 +131,7 @@ namespace HearthstoneBot.Objects
 
                 }
 
-                foreach (var cardClass in value.Class.Split(',').Select(str => str.Trim()))
+                foreach (var cardClass in card.Class.Split(',').Select(str => str.Trim()))
                 {
 
                     CountClass(cardClass);
@@ -138,21 +139,23 @@ namespace HearthstoneBot.Objects
                 }
 
 
-                if (value.Set.ToLower() != "cheat" && value.Abilities != null && value.Tags != null)
+                if (card.Set.ToLower() != "cheat" && card.Abilities != null && card.Tags != null)
                 {
 
-                    CountAbilities(value.Abilities);
-                    CountTags(value.Tags);
+                    CountAbilities(card.Abilities);
+                    CountTags(card.Tags);
 
                 }
 
-                CountSet(value.Set);
-                CountRarity(value.Rarity);
-                CountArtists(value.Artist);
+                CountSet(card.Set);
+                CountRarity(card.Rarity);
+                CountArtists(card.Artist);
 
             });
 
             CalculateAverages();
+
+            AltConsole.Print("Objects", "HStats", "HStats initialized.");
 
         }
 
@@ -189,7 +192,7 @@ namespace HearthstoneBot.Objects
         private static void CalculateAverages()
         {
 
-            var cards = Cache.Cards.Values;
+            var cards = Cache.CardObjects;
             int aManaCost, aAttack, aHealth, aDurability, manaCounter, attackCounter, healthCounter, durabilityCounter;
             aManaCost = aAttack = aHealth = aDurability = manaCounter = attackCounter = healthCounter = durabilityCounter = 0;
 
@@ -215,7 +218,7 @@ namespace HearthstoneBot.Objects
 
                     }
 
-                    if (card.Health != "N/A")
+                    if (card.Health != "N/A" && !card.Health.Contains("Heroic"))
                     {
 
                         Interlocked.Add(ref aHealth, int.Parse(card.Health));

@@ -19,7 +19,7 @@ namespace HearthstoneBot.Core
         {
 
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write($"{DateTime.Now.ToString()} ");
+            Console.Write($"{DateTime.Now} ");
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.Write($"[{firstBracket}]");
             Console.ForegroundColor = ConsoleColor.DarkCyan;
@@ -50,7 +50,7 @@ namespace HearthstoneBot.Core
         {
 
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write($"{DateTime.Now.ToString()} ");
+            Console.Write($"{DateTime.Now} ");
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.Write($"[{firstBracket}]");
             Console.ForegroundColor = ConsoleColor.DarkCyan;
@@ -78,13 +78,27 @@ namespace HearthstoneBot.Core
         {
 
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write($"{DateTime.Now.ToString()} ");
+            Console.Write($"{DateTime.Now} ");
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.Write($"[AltConsole]");
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.Write($"[Print] ");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($"{line}");
+
+        }
+
+        public static void InLinePrint(string firstBracket, string secondBracket, string message)
+        {
+
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write($"{DateTime.Now} ");
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.Write($"[{firstBracket}]");
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.Write($"[{secondBracket}] ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write($"{message}\r");
 
         }
 

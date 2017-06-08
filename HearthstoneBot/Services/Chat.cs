@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using MoreLinq;
 using Discord;
 using HearthstoneBot.Objects;
+using Force.DeepCloner;
 
 namespace HearthstoneBot.Services
 {
@@ -42,56 +43,23 @@ namespace HearthstoneBot.Services
                     foreach (var match in matches.OfType<Match>())
                     {
 
-                        var card = match.Value;
-                        card = card.Substring(1, card.Length - 2).ToLower();
+                        var search = match.Value;
+                        search = search.Substring(1, search.Length - 2).ToLower();
 
-                        var embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Name.ToLower() == card).Value;
+                        var embed = Cache.Embeds.FirstOrDefault(kv => kv.Key == search).Value;
 
-                        if (embed != null)
+                        if(embed == null)
                         {
 
-                            await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
-                            return;
+                            var array = search.Split(' ');
+                            embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Split(' ').All(str => array.Contains(str))).Value;
+
+                            if(embed == null)
+                                embed = Cache.Embeds.MinBy(kv => Compute(kv.Key, search)).Value;
 
                         }
-                        else
-                        {
 
-                            if (!Cache.Cards.TryGetValue(card, out Card closestCard))
-                            {
-
-                                var cardArray = card.Split(' ');
-                                closestCard = Cache.Cards.FirstOrDefault(kv => cardArray.All(str => kv.Key.Contains(str))).Value;
-
-                                if (closestCard == null)
-                                {
-
-                                    closestCard = Cache.Cards.MinBy(kv => Compute(kv.Key, card)).Value;
-                                    embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
-
-                                    if (embed != null)
-                                    {
-
-                                        await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
-                                        return;
-
-                                    }
-
-                                }
-                                else
-                                {
-
-                                    embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Name.ToLower() == closestCard.Name.ToLower()).Value;
-                                    await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
-                                    return;
-
-                                }
-
-                            }
-
-                            await PrintCardToChat(closestCard, message.Channel, isMinimal);
-
-                        }
+                        await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
 
                     }
 
@@ -101,128 +69,15 @@ namespace HearthstoneBot.Services
 
         }
 
-        public static async Task PrintCardToChat(Card card, ISocketMessageChannel channel, bool isMinimal)
-        {
-
-            var author = new EmbedAuthorBuilder()
-                .WithIconUrl("https://cdn.iconverticons.com/files/png/e374004e6f5ac18b_256x256.png")
-                .WithUrl("http://us.battle.net/hearthstone/en/")
-                .WithName("Hearthstone");
-
-            var footer = new EmbedFooterBuilder()
-                .WithIconUrl("http://i.imgur.com/zz1Bcek.png")
-                .WithText("Brought to you by The One and Only");
-
-            var body = new EmbedBuilder
-            {
-
-                Author = author,
-                Color = GetColor(card.Class),
-                ImageUrl = card.GoldImage,
-                Url = card.Url,
-                ThumbnailUrl = card.RegularImage,
-                Title = card.Name,
-                Footer = footer,
-
-            };
-
-            body.Description = GenerateDescription(card);
-
-            if (!string.IsNullOrEmpty(card.Description))
-                body.AddField("Description", card.Description);
-
-            if (!string.IsNullOrEmpty(card.Lore))
-                body.AddField("Lore", card.Lore ?? "N/A");
-
-            if (card.Abilities != null)
-                body.AddField("Abilities", string.Join(", ", card.Abilities));
-
-            if (card.Tags != null)
-                body.AddField("Tags", string.Join(", ", card.Tags));
-
-            body.AddField("Artist", card.Artist ?? "None");
-
-            Cache.AddToEmbedsCache(card, body);
-
-            await channel.SendMessageAsync("", embed: CleanEmbed(body, isMinimal));
-
-        }
-
-        public static string GenerateDescription(Card card)
-        {
-            
-            var builder = new StringBuilder($"**Set:** {card.Set}\n" +
-                $"**Type:** {card.Type}\n");
-
-            if (card.Class != Check)
-                builder.AppendLine($"**Class:** {card.Class}");
-
-            if (card.Rarity != Check)
-                builder.AppendLine($"**Rarity:** {card.Rarity}");
-
-            if (card.ManaCost != Check)
-                builder.AppendLine($"**Mana Cost:** {card.ManaCost}");
-
-            if (card.Attack != Check)
-                builder.AppendLine($"**Attack:** {card.Attack}");
-
-            if (card.Health != Check)
-                builder.AppendLine($"**Health:** {card.Health}");
-
-            if (card.Durability != Check)
-                builder.AppendLine($"**Durability:** {card.Durability}");
-
-            return builder.ToString();
-
-        }
-
-        public static Color GetColor(string cardClass)
-        {
-
-            switch (cardClass)
-            {
-
-                case "Hunter":
-                    return new Color(102, 102, 102);
-                case "Priest":
-                    return new Color(167, 174, 182);
-                case "Warlock":
-                    return new Color(78, 50, 88);
-                case "Warrior":
-                    return new Color(87, 97, 88);
-                case "Paladin":
-                    return new Color(183, 137, 60);
-                case "Druid":
-                    return new Color(104, 59, 40);
-                case "Mage":
-                    return new Color(107, 118, 163);
-                case "Shaman":
-                    return new Color(50, 53, 96);
-                case "Rogue":
-                    return new Color(55, 54, 60);
-                default:
-                    return new Color(107, 86, 75);
-
-
-            }
-
-        }
-
         public static EmbedBuilder CleanEmbed(EmbedBuilder embedToClean, bool isMinimal)
         {
 
-            if (isMinimal && embedToClean.ImageUrl != null)
-            {
+            var clone = embedToClean.DeepClone();
 
-                var image = embedToClean.ImageUrl;
-                embedToClean.ImageUrl = null;
+            if (isMinimal)
+                clone.ImageUrl = null;
 
-                if (embedToClean.ThumbnailUrl == null)
-                    embedToClean.ThumbnailUrl = image;
-
-            }
-
-            return embedToClean;
+            return clone;
 
         }
 

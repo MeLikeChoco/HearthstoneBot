@@ -2,6 +2,7 @@
 using Discord.Addons.InteractiveCommands;
 using Discord.Commands;
 using Discord.WebSocket;
+using HearthstoneBot.Core;
 using HearthstoneBot.Services;
 using MoreLinq;
 using System;
@@ -23,13 +24,6 @@ namespace HearthstoneBot.Modules
 
         }
 
-        protected override void AfterExecute()
-        {
-
-            _timer.Dispose();
-
-        }
-
         private ISocketMessageChannel _channel;
         private SocketUser _winner;
         private bool _didGameEnd = false;
@@ -41,7 +35,7 @@ namespace HearthstoneBot.Modules
         public async Task GuessCommand()
         {
 
-            if (Cache.GuessGames.TryGetValue(_channel.Id, out var gameInProgress))
+            if (Cache.GuessGames.ContainsKey(_channel.Id))
             {
 
                 await ReplyAsync("There is already a game in progress! Wait for it to end.");
@@ -49,15 +43,11 @@ namespace HearthstoneBot.Modules
 
             }
             else
-            {
+                Cache.GuessGames[_channel.Id] = null;
 
-                gameInProgress = true;
-                Cache.GuessGames[_channel.Id] = true;
-
-            }
-
-            var kv = Cache.FullArts.RandomSubset(1).First();
-            _match = kv.Key.ToLower();
+            //var kv = Cache.FullArts.RandomSubset(1).First();
+            var kv = Cache.FullArts.FirstOrDefault(keyvalue => keyvalue.Key == "Rallying Blade");
+            _match = kv.Key;
 
             using (Context.Channel.EnterTypingState())
             {
@@ -74,61 +64,45 @@ namespace HearthstoneBot.Modules
 
             while (!_didGameEnd) { }
 
-            Context.Client.MessageReceived -= CompareMessage;
-
-            using (Context.Channel.EnterTypingState())
-            {
-
-                if (_winner == null)
-                {
-
-                    await ReplyAsync($":poop: There was no winner! The card was `{kv.Key}`!");
-                    Cache.GuessGames.TryRemove(_channel.Id, out var blah);
-
-                }
-                else
-                {
-
-                    if (_channel is SocketTextChannel)
-                    {
-
-                        var user = _winner as SocketGuildUser;
-                        await ReplyAsync($":trophy: The card was `{kv.Key}`! {user.Nickname ?? user.Username}");
-
-                    }
-                    else
-                        await ReplyAsync($":trophy: The card was `{kv.Key}`! {_winner.Username}");
-
-
-                }
-
-            }
-
         }
 
-        private Task CompareMessage(SocketMessage message)
+        private async Task CompareMessage(SocketMessage message)
         {
 
             if (message.Channel.Id != _channel.Id)
-                return Task.CompletedTask;
-
-            if (message.Content.ToLower() == _match)
+                return;
+            
+            if (message.Content.ToLower() == _match.ToLower())
             {
-
+                
                 _winner = message.Author;
                 _didGameEnd = true;
+                Context.Client.MessageReceived -= CompareMessage;
+
+                if (_channel is SocketTextChannel)
+                {
+                    
+                    var user = _winner as SocketGuildUser;
+                    await ReplyAsync($":trophy: The card was `{_match}`! **{user.Nickname ?? user.Username}** got the card!");
+
+                }
+                else
+                    await ReplyAsync($":trophy: The card was `{_match}`! **{_winner.Username}** got the card!");
+
+                Cache.GuessGames.TryRemove(_channel.Id, out var blah);
 
             }
-
-            return Task.CompletedTask;
 
         }
 
         private void OnTimeUp(object state)
         {
-
+            
             _didGameEnd = true;
+
             Context.Client.MessageReceived -= CompareMessage;
+            ReplyAsync($":poop: There was no winner! The card was `{_match}`!");
+            Cache.GuessGames.TryRemove(_channel.Id, out var blah);
 
         }
     }

@@ -101,7 +101,7 @@ namespace HearthstoneBot.Modules
             using (Context.Channel.EnterTypingState())
             {
 
-                var ramUsage = ((double)_program.PrivateMemorySize64 / 1024 / 1024).ToString("#.##");
+                var ramUsage = ((double)_program.WorkingSet64 / 1024 / 1024).ToString("0.##");
                 var appInfo = await Context.Client.GetApplicationInfoAsync();
                 var owner = appInfo.Owner;
                 var creationDate = appInfo.CreatedAt;

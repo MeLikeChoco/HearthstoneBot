@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using HearthstoneBot.Core;
 using HearthstoneBot.Objects;
 using MoreLinq;
@@ -26,13 +27,14 @@ namespace HearthstoneBot.Services
         public static HashSet<string> LowerCardNames { get; private set; }
         public static HashSet<Card> CardObjects { get; private set; }
         public static Dictionary<string, string> FullArts { get; private set; }
-        public static ConcurrentDictionary<ulong, bool> GuessGames { get; set; }
+        public static ConcurrentDictionary<ulong, object> GuessGames { get; set; }
 
         public static void InitializeCache()
         {
 
             AltConsole.Print("Caching all cards in Database.json...");
 
+            GuessGames = new ConcurrentDictionary<ulong, object>();
             var json = File.ReadAllText(DbPath);
             CardObjects = JsonConvert.DeserializeObject<HashSet<Card>>(json);
             var tempFullArts = new ConcurrentDictionary<string, string>();
@@ -48,7 +50,10 @@ namespace HearthstoneBot.Services
                 var embed = GenerateEmbed(card);
                 var cardName = card.Name.ToLower();
 
-                if (!string.IsNullOrEmpty(card.FullArt) && !card.Name.Contains("("))
+                if (!string.IsNullOrEmpty(card.FullArt) 
+                && card.Set.ToLower() != "credits"
+                && card.Set.ToLower() != "tavern brawl"
+                && !card.Name.Contains("("))
                     tempFullArts[card.Name] = card.FullArt;
 
                 tempDict[cardName] = embed;
@@ -66,8 +71,6 @@ namespace HearthstoneBot.Services
             FullArts = new Dictionary<string, string>(tempFullArts);
 
             AltConsole.Print("Finished caching all cards in Database.json");
-
-            GuessGames = new ConcurrentDictionary<ulong, bool>();
 
         }
 
@@ -149,6 +152,8 @@ namespace HearthstoneBot.Services
 
             if (!string.IsNullOrEmpty(card.Durability))
                 builder.AppendLine($"**Durability:** {card.Durability}");
+
+            builder.AppendLine($"**Collectibility:** {card.Collectability}");
 
             return builder.ToString();
 

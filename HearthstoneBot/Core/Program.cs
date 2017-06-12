@@ -24,7 +24,7 @@ namespace HearthstoneBot.Core
 
         public async Task Run(string[] args)
         {
-
+            
             AltConsole.Print("Hearthstone Bot has started up...");
 
             _args = args;

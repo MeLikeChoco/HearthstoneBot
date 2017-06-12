@@ -15,12 +15,12 @@ namespace HearthstoneBot.Services
     public class Chat
     {
 
-        public const string InlinePattern = "{.+?}", Check = "N/A";
+        public const string InlinePattern = "{{.+?}}", Check = "N/A";
 
         public static async Task CardSearch(SocketMessage message)
         {
 
-            if (message.Author.IsBot)
+            if (message.Author.IsBot || message.Content.Contains("eval"))
                 return;
 
             var matches = Regex.Matches(message.Content, InlinePattern);

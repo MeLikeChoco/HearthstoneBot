@@ -15,9 +15,10 @@ namespace HearthstoneBot.Services
     {
 
         private static HttpClient _http = new HttpClient();
-        private const string BlackDiscordBots = "https://bots.discord.pw";
         private const string BlueDiscordBots = "https://discordbots.org";
+        private const string BlackDiscordBots = "https://bots.discord.pw";
         private const string DiscordBotsEndpoint = "/api/bots/312429302283108353/stats";
+        private const string Payload = "{{ \"server_count\": count }}";
 
         public static async Task<Stream> GetImage(string url)
         {
@@ -37,7 +38,7 @@ namespace HearthstoneBot.Services
             //fuck you guys for not having different names, why you all have to be named "Discord Bots" or something along those lines...
             Log("Posting server count to Blue Discord Bots...");
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Config.BlueDiscordBots);
-            var payload = new StringContent($"{{ \"server_count\": {guildCount}}}", Encoding.UTF8, "application/json");
+            var payload = new StringContent(Payload.Replace("count", guildCount.ToString()), Encoding.UTF8, "application/json");
 
             try
             {
@@ -55,7 +56,7 @@ namespace HearthstoneBot.Services
 
             Log("Posting server count to Black Discord Bots...");
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Config.BlackDiscordBots);
-            payload = new StringContent($"{{ \"server_count\": {guildCount}}}", Encoding.UTF8, "application/json");
+            payload = new StringContent(Payload.Replace("count", guildCount.ToString()), Encoding.UTF8, "application/json");
 
             try
             {

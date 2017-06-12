@@ -14,6 +14,11 @@ namespace HearthstoneBot.Modules
     public class GuildSettings : ModuleBase<SocketCommandContext>
     {
 
+        [Command("minimal")]
+        [Summary("Gets the minimal setting")]
+        public async Task MinimalSettingCommand()
+            => await ReplyAsync($"The minimal setting is: {Settings.GetMinimalSetting(Context.Guild.Id)}");
+
         [Command("prefix")]
         [Summary("Set prefix")]
         [RequireUserPermission(GuildPermission.Administrator)]

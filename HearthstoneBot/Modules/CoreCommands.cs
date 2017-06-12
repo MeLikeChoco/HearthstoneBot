@@ -41,7 +41,7 @@ namespace HearthstoneBot.Modules
             else if (length == 0)
             {
 
-                await ReplyAsync($"Nothing was found with the search term of {search}!");
+                await ReplyAsync($"Nothing was found with the search term of `{search}`!");
                 return;
 
             }
@@ -97,7 +97,7 @@ namespace HearthstoneBot.Modules
             else if (length == 0)
             {
 
-                await ReplyAsync($"Nothing was found with the search term of {search}!");
+                await ReplyAsync($"Nothing was found with the search term of `{search}`!");
                 return;
 
             }

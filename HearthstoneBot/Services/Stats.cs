@@ -42,7 +42,7 @@ namespace HearthstoneBot.Services
         {
 
             _calculateStats = new Timer(GetStats, null, 10000, 3600000);
-            _sendStats = new Timer(SendStats, null, 10000, 3600000);
+            _sendStats = new Timer(SendStats, null, 3000, 3600000);
 
             return Task.CompletedTask;
 

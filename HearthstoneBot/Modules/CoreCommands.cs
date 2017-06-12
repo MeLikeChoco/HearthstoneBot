@@ -26,7 +26,7 @@ namespace HearthstoneBot.Modules
         {
 
             var aSearch = search.ToLower();
-            var cards = Cache.CardObjects.Where(card => card.Name.ToLower().Contains(aSearch));
+            var cards = Cache.CardNames.Where(name => name.ToLower().Contains(aSearch));
             var length = cards.Count();
             IUserMessage selection;
             string content;
@@ -50,14 +50,14 @@ namespace HearthstoneBot.Modules
             else
             {
 
-                var results = GenerateSearch(cards.Select(c => c.Name));
+                var results = GenerateSearch(cards);
 
                 await ReplyAsync(results);
 
                 selection = await WaitForMessage(Context.User, Context.Channel, TimeSpan.FromSeconds(60));
                 content = selection.Content;
 
-            }      
+            }
 
             if (int.TryParse(content, out var number))
             {
@@ -67,7 +67,7 @@ namespace HearthstoneBot.Modules
                 if (card != null)
                 {
 
-                    var embed = Cache.Embeds[card.Name.ToLower()];
+                    var embed = Cache.Embeds[card.ToLower()];
                     await ReplyAsync("", embed: Chat.CleanEmbed(embed, _isMinimal));
 
                 }
@@ -82,7 +82,7 @@ namespace HearthstoneBot.Modules
         {
 
             var array = search.ToLower().Split(' ');
-            var cards = Cache.CardObjects.Where(card => array.All(str => card.Name.ToLower().Contains(str)));
+            var cards = Cache.CardNames.Where(name => array.All(str => name.ToLower().Contains(str)));
             var length = cards.Count();
             IUserMessage selection;
             string content;
@@ -106,7 +106,7 @@ namespace HearthstoneBot.Modules
             else
             {
 
-                var results = GenerateSearch(cards.Select(c => c.Name));
+                var results = GenerateSearch(cards);
 
                 await ReplyAsync(results);
 
@@ -123,7 +123,7 @@ namespace HearthstoneBot.Modules
                 if (card != null)
                 {
 
-                    var embed = Cache.Embeds[card.Name.ToLower()];
+                    var embed = Cache.Embeds[card.ToLower()];
                     await ReplyAsync("", embed: Chat.CleanEmbed(embed, _isMinimal));
 
                 }
@@ -179,6 +179,32 @@ namespace HearthstoneBot.Modules
             var embed = Cache.Embeds[cardName];
 
             await ReplyAsync("", embed: Chat.CleanEmbed(embed, _isMinimal));
+
+        }
+
+        [Command("art"), Alias("a")]
+        [Summary("Get the full art of a card")]
+        public async Task ArtCommand([Remainder]string search)
+        {
+
+            var url = Cache.FullArts.FirstOrDefault(kv => kv.Key.ToLower() == search.ToLower()).Value;
+
+            if (url == null)
+            {
+
+                await ReplyAsync($"No card with the name of `{search}` was found!");
+                return;
+
+            }
+
+            using (Context.Channel.EnterTypingState())
+            {
+
+                var stream = await Web.GetImage(url);
+
+                await Context.Channel.SendFileAsync(stream, "jpg");
+
+            }
 
         }
 

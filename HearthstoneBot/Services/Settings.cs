@@ -43,8 +43,7 @@ namespace HearthstoneBot.Services
         public static string GetPrefix(ulong id)
         {
 
-            _guildSettings.TryGetValue(id, out GuildSetting setting);
-            return setting.Prefix;
+            return _guildSettings[id].Prefix;
 
         }
 
@@ -72,8 +71,7 @@ namespace HearthstoneBot.Services
         public static bool GetMinimalSetting(ulong id)
         {
 
-            var settings = _guildSettings[id];
-            return settings.IsMinimal;
+            return _guildSettings[id].IsMinimal;
 
         }
 
@@ -85,21 +83,24 @@ namespace HearthstoneBot.Services
 
                 await connection.OpenAsync();
 
-                var possibleEntry = await connection.ExecuteScalarAsync<ulong?>("select Id from GuildSettings where Id = @Id", new { Id = guild.Id });
+                var possibleEntry = await connection.ExecuteScalarAsync<ulong>("select Id from GuildSettings where Id = @Id", new { Id = guild.Id });
 
-                if (possibleEntry != null)
-                    return;
-
-                var setting = new GuildSetting
+                if (possibleEntry == 0)
                 {
 
-                    Id = guild.Id,
-                    Prefix = DefaultPrefix,
-                    IsMinimal = false,
+                    var setting = new GuildSetting
+                    {
 
-                };
+                        Id = guild.Id,
+                        Prefix = DefaultPrefix,
+                        IsMinimal = false,
 
-                await connection.InsertAsync(setting);
+                    };
+
+                    await connection.InsertAsync(setting);
+                    _guildSettings[guild.Id] = setting;
+
+                }
 
                 connection.Close();
 
@@ -107,7 +108,7 @@ namespace HearthstoneBot.Services
 
         }
 
-        public static async Task InitializeSettings()
+        public static async Task InitializeSettings(DiscordSocketClient client)
         {
 
             using (var connection = new SqliteConnection(DbPath))
@@ -117,6 +118,14 @@ namespace HearthstoneBot.Services
 
                 var settings = await connection.GetAllAsync<GuildSetting>();
                 _guildSettings = new ConcurrentDictionary<ulong, GuildSetting>(settings.ToDictionary(setting => setting.Id, setting => setting));
+                var uninitializedGuilds = client.Guilds.Where(guild => !_guildSettings.ContainsKey(guild.Id)).ToList();
+
+                foreach (var guild in uninitializedGuilds)
+                {
+
+                    await CreateSettings(guild);
+
+                }
 
                 connection.Close();
 

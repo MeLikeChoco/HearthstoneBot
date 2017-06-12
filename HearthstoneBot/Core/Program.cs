@@ -29,6 +29,7 @@ namespace HearthstoneBot.Core
 
             _args = args;
 
+            ParseArgs();            
             Config.Initialize();
 
             _client = new DiscordSocketClient(new DiscordSocketConfig
@@ -37,7 +38,7 @@ namespace HearthstoneBot.Core
                 LogLevel = LogSeverity.Verbose,
                 WebSocketProvider = WS4NetProvider.Instance,
                 MessageCacheSize = 1000,
-                AlwaysDownloadUsers = true,                
+                AlwaysDownloadUsers = true,
 
             });
             _commands = new CommandService(new CommandServiceConfig
@@ -73,6 +74,7 @@ namespace HearthstoneBot.Core
             _client.MessageReceived += Events.CommandHandler;
             _client.MessageReceived += Chat.CardSearch;
             _client.Ready += Events.SetGame;
+            _client.Ready += Stats.ReadyStats;
             _client.JoinedGuild += Settings.CreateSettings;
 
         }

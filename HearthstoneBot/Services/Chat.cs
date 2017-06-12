@@ -15,12 +15,15 @@ namespace HearthstoneBot.Services
     public class Chat
     {
 
-        public const string Pattern = "<.+?>", Check = "N/A";
+        public const string InlinePattern = "{.+?}", Check = "N/A";
 
         public static async Task CardSearch(SocketMessage message)
         {
 
-            var matches = Regex.Matches(message.Content, Pattern);
+            if (message.Author.IsBot)
+                return;
+
+            var matches = Regex.Matches(message.Content, InlinePattern);
 
             if (matches.Count < 4 && matches.Count != 0)
             {
@@ -72,10 +75,18 @@ namespace HearthstoneBot.Services
         public static EmbedBuilder CleanEmbed(EmbedBuilder embedToClean, bool isMinimal)
         {
 
+            if (!isMinimal)
+                return embedToClean;
+
             var clone = embedToClean.DeepClone();
 
             if (isMinimal)
+            {
+
                 clone.ImageUrl = null;
+                clone.Fields.RemoveAll(field => field.Name == "Abilities" || field.Name == "Tags");
+
+            }
 
             return clone;
 

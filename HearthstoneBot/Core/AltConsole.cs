@@ -21,7 +21,7 @@ namespace HearthstoneBot.Core
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.Write($"{DateTime.Now} ");
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.Write($"[{firstBracket}]");
+           Console.Write($"[{firstBracket}]");
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.Write($"[{secondBracket}] ");
             Console.ForegroundColor = ConsoleColor.White;

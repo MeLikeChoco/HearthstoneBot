@@ -97,9 +97,10 @@ namespace HearthstoneBot.Core
             _services = new ServiceCollection()
                 .BuildServiceProvider();
 
+            await Settings.InitializeSettings(_client);
             Cache.InitializeCache();
-            await Settings.InitializeSettings();
             HStats.Initialize();
+            Stats.Initialize(_client);
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
 

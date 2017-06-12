@@ -12,6 +12,7 @@ namespace HearthstoneBot.Objects
     public class GuildSetting
     {
 
+        [ExplicitKey]
         public ulong Id { get; set; }
         public string Prefix { get; set; }
         public bool IsMinimal { get; set; }

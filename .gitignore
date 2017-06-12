@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /HearthstoneBot/Properties
 /HearthstoneBot/Database/Settings.db
+/HearthstoneBot/Modules/UtilityCommands.cs

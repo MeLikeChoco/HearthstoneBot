@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+//technically not an object, but put it here anyway
+
 namespace HearthstoneBot.Objects
 {
     public static class HStats
@@ -148,7 +150,7 @@ namespace HearthstoneBot.Objects
                 }
 
                 CountSet(card.Set);
-                CountRarity(card.Rarity);
+                CountRarity(card.Rarity.ToString());
                 CountArtists(card.Artist);
 
             });
@@ -202,7 +204,7 @@ namespace HearthstoneBot.Objects
                 if(card.Set.ToLower() != "cheat")
                 {
 
-                    if (card.ManaCost != "N/A")
+                    if (!string.IsNullOrEmpty(card.ManaCost))
                     {
 
                         Interlocked.Add(ref aManaCost, int.Parse(card.ManaCost));
@@ -210,7 +212,7 @@ namespace HearthstoneBot.Objects
 
                     }
 
-                    if (card.Attack != "N/A")
+                    if (!string.IsNullOrEmpty(card.Attack))
                     {
 
                         Interlocked.Add(ref aAttack, int.Parse(card.Attack));
@@ -218,7 +220,7 @@ namespace HearthstoneBot.Objects
 
                     }
 
-                    if (card.Health != "N/A" && !card.Health.Contains("Heroic"))
+                    if (!string.IsNullOrEmpty(card.Health) && !card.Health.Contains("Heroic"))
                     {
 
                         Interlocked.Add(ref aHealth, int.Parse(card.Health));
@@ -226,7 +228,7 @@ namespace HearthstoneBot.Objects
 
                     }
 
-                    if (card.Durability != "N/A")
+                    if (!string.IsNullOrEmpty(card.Durability))
                     {
 
                         Interlocked.Add(ref aDurability, int.Parse(card.Durability));

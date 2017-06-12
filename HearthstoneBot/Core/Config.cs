@@ -13,6 +13,9 @@ namespace HearthstoneBot.Core
         public static string BotToken { get; private set; }
         public static string TestToken { get; private set; }
         public static string Game { get; private set; }
+        public static string BlueDiscordBots { get; private set; }        
+        public static string BlackDiscordBots { get; private set; }
+        public static string PurpleDiscordBots { get; private set; }
 
         public static void Initialize()
         {
@@ -24,6 +27,8 @@ namespace HearthstoneBot.Core
             BotToken = manager.GetString("BotToken");
             TestToken = manager.GetString("TestToken");
             Game = manager.GetString("Game");
+            BlueDiscordBots = manager.GetString("BlueDiscordBots");
+            BlackDiscordBots = manager.GetString("BlackDiscordBots");
 
             AltConsole.Print("Config", "Config", "Configuration initialized.");
 

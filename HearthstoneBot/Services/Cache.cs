@@ -21,8 +21,12 @@ namespace HearthstoneBot.Services
         private const string Check = "N/A";
 
         public static Dictionary<string, EmbedBuilder> Embeds { get; private set; }
+        public static Dictionary<string, Card> CardObjectDict { get; private set; }
         public static HashSet<string> CardNames { get; private set; }
-        public static List<Card> CardObjects { get; private set; }
+        public static HashSet<string> LowerCardNames { get; private set; }
+        public static HashSet<Card> CardObjects { get; private set; }
+        public static Dictionary<string, string> FullArts { get; private set; }
+        public static ConcurrentDictionary<ulong, bool> GuessGames { get; set; }
 
         public static void InitializeCache()
         {
@@ -30,32 +34,40 @@ namespace HearthstoneBot.Services
             AltConsole.Print("Caching all cards in Database.json...");
 
             var json = File.ReadAllText(DbPath);
-            var cards = JsonConvert.DeserializeObject<List<Card>>(json);
+            CardObjects = JsonConvert.DeserializeObject<HashSet<Card>>(json);
+            var tempFullArts = new ConcurrentDictionary<string, string>();
             var tempDict = new ConcurrentDictionary<string, EmbedBuilder>();
             var tempList = new ConcurrentBag<string>();
-            var tempObjects = new ConcurrentBag<Card>();
+            var lowerTempList = new ConcurrentBag<string>();
             var counter = 0;
-            var totalAmount = cards.Count;
+            var totalAmount = CardObjects.Count;
 
-            Parallel.ForEach(cards, card =>
+            Parallel.ForEach(CardObjects, card =>
             {
 
                 var embed = GenerateEmbed(card);
                 var cardName = card.Name.ToLower();
 
+                if (!string.IsNullOrEmpty(card.FullArt) && !card.Name.Contains("("))
+                    tempFullArts[card.Name] = card.FullArt;
+
                 tempDict[cardName] = embed;
-                tempList.Add(cardName);
-                tempObjects.Add(card);
+                tempList.Add(card.Name);
+                lowerTempList.Add(cardName);
 
                 Log($"Progress: {Interlocked.Increment(ref counter)}/{totalAmount}");
 
             });
-
+                        
             CardNames = new HashSet<string>(tempList);
-            CardObjects = new List<Card>(tempObjects);
+            LowerCardNames = new HashSet<string>(lowerTempList);
             Embeds = tempDict.ToDictionary();
+            CardObjectDict = CardObjects.ToDictionary(card => card.Name.ToLower(), card => card);
+            FullArts = new Dictionary<string, string>(tempFullArts);
 
             AltConsole.Print("Finished caching all cards in Database.json");
+
+            GuessGames = new ConcurrentDictionary<ulong, bool>();
 
         }
 
@@ -76,9 +88,9 @@ namespace HearthstoneBot.Services
 
                 Author = author,
                 Color = GetColor(card.Class),
-                ImageUrl = card.GoldImage,
+                ImageUrl = card.FullArt,
+                ThumbnailUrl = card.GoldImage ?? card.RegularImage,
                 Url = card.Url,
-                ThumbnailUrl = card.RegularImage,
                 Title = card.Name,
                 Footer = footer,
 
@@ -104,7 +116,7 @@ namespace HearthstoneBot.Services
             if (card.Tags != null)
                 body.AddField("Tags", string.Join(", ", card.Tags));
 
-            if (card.Artist != null)
+            if (!string.IsNullOrEmpty(card.Artist))
                 body.AddField("Artist", card.Artist);
 
             return body;
@@ -117,22 +129,25 @@ namespace HearthstoneBot.Services
             var builder = new StringBuilder($"**Set:** {card.Set}\n" +
                 $"**Type:** {card.Type}\n");
 
+            if (card.Type == Objects.Type.Minion)
+                builder.AppendLine($"**Race:** {card.Race}");
+
             if (card.Class != Check)
                 builder.AppendLine($"**Class:** {card.Class}");
 
-            if (card.Rarity != Check)
+            if (card.Rarity != Rarity.Basic)
                 builder.AppendLine($"**Rarity:** {card.Rarity}");
 
-            if (card.ManaCost != Check)
+            if (!string.IsNullOrEmpty(card.ManaCost))
                 builder.AppendLine($"**Mana Cost:** {card.ManaCost}");
 
-            if (card.Attack != Check)
+            if (!string.IsNullOrEmpty(card.Attack))
                 builder.AppendLine($"**Attack:** {card.Attack}");
 
-            if (card.Health != Check)
+            if (!string.IsNullOrEmpty(card.Health))
                 builder.AppendLine($"**Health:** {card.Health}");
 
-            if (card.Durability != Check)
+            if (!string.IsNullOrEmpty(card.Durability))
                 builder.AppendLine($"**Durability:** {card.Durability}");
 
             return builder.ToString();

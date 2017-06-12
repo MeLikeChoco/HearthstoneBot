@@ -1,4 +1,5 @@
-﻿using Discord.Addons.InteractiveCommands;
+﻿using Discord;
+using Discord.Addons.InteractiveCommands;
 using Discord.Commands;
 using HearthstoneBot.Services;
 using System;
@@ -15,6 +16,7 @@ namespace HearthstoneBot.Modules
 
         [Command("prefix")]
         [Summary("Set prefix")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task PrefixCommand(string prefix = null)
         {
 
@@ -37,16 +39,46 @@ namespace HearthstoneBot.Modules
 
         [Command("minimal")]
         [Summary("Sets minimal settings")]
-        public async Task MinimalCommand(string maybeMinimal)
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task MinimalCommand(bool setting)
         {
 
-            if (bool.TryParse(maybeMinimal, out var isMinimal))
+            await Settings.SetMinimalSetting(Context.Guild.Id, setting);
+            await ReplyAsync("Minimal setting has been set to: " + setting);
+
+        }
+
+        [Command("prefix")]
+        [Summary("Set prefix")]
+        [RequireOwner]
+        public async Task PrefixCommandOwner(string prefix = null)
+        {
+
+            if (string.IsNullOrEmpty(prefix))
             {
 
-                await Settings.SetMinimalSetting(Context.Guild.Id, isMinimal);
-                await ReplyAsync("Minimal setting has been set to: " + maybeMinimal);
+                await Settings.SetPrefix(Context.Guild.Id, "h^");
+                await ReplyAsync("Prefix has been reset to: h^");
 
             }
+            else
+            {
+
+                await Settings.SetPrefix(Context.Guild.Id, prefix);
+                await ReplyAsync("Prefix has been set to: " + prefix);
+
+            }
+
+        }
+
+        [Command("minimal")]
+        [Summary("Sets minimal settings")]
+        [RequireOwner]
+        public async Task MinimalCommandOwner(bool setting)
+        {
+
+            await Settings.SetMinimalSetting(Context.Guild.Id, setting);
+            await ReplyAsync("Minimal setting has been set to: " + setting);
 
         }
 

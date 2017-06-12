@@ -45,8 +45,8 @@ namespace HearthstoneBot.Modules
             else
                 Cache.GuessGames[_channel.Id] = null;
 
-            //var kv = Cache.FullArts.RandomSubset(1).First();
-            var kv = Cache.FullArts.FirstOrDefault(keyvalue => keyvalue.Key == "Rallying Blade");
+            var kv = Cache.FullArts.RandomSubset(1).First();
+            //var kv = Cache.FullArts.FirstOrDefault(keyvalue => keyvalue.Key == "Rallying Blade");
             _match = kv.Key;
 
             using (Context.Channel.EnterTypingState())
@@ -61,8 +61,6 @@ namespace HearthstoneBot.Modules
             Context.Client.MessageReceived += CompareMessage;
 
             _timer = new Timer(OnTimeUp, null, 60000, Timeout.Infinite);
-
-            while (!_didGameEnd) { }
 
         }
 
@@ -90,6 +88,7 @@ namespace HearthstoneBot.Modules
                     await ReplyAsync($":trophy: The card was `{_match}`! **{_winner.Username}** got the card!");
 
                 Cache.GuessGames.TryRemove(_channel.Id, out var blah);
+                _timer.Dispose();
 
             }
 
@@ -103,6 +102,7 @@ namespace HearthstoneBot.Modules
             Context.Client.MessageReceived -= CompareMessage;
             ReplyAsync($":poop: There was no winner! The card was `{_match}`!");
             Cache.GuessGames.TryRemove(_channel.Id, out var blah);
+            _timer.Dispose();
 
         }
     }

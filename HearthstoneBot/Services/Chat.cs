@@ -47,20 +47,26 @@ namespace HearthstoneBot.Services
                     {
 
                         var search = match.Value;
-                        search = search.Substring(1, search.Length - 2).ToLower();
+                        search = search.Substring(2, search.Length - 4).ToLower();
+                        var array = search.Split(' ');
 
-                        var embed = Cache.Embeds.FirstOrDefault(kv => kv.Key == search).Value;
+                        var embed = Cache.Embeds.FirstOrDefault(kv => kv.Key == search).Value
+                            ?? Cache.Embeds.FirstOrDefault(kv => array.All(str => kv.Key.Contains(str))).Value
+                            //?? Cache.Embeds.FirstOrDefault(kv => kv.Key.Split(' ').Any(str => array.Contains(str))).Value
+                            ?? Cache.Embeds.MinBy(kv => Compute(kv.Key, search)).Value;
 
-                        if(embed == null)
-                        {
+                        //var test = Cache.Embeds.Where(kv => array.Any(str => kv.Key.Contains(str)));
 
-                            var array = search.Split(' ');
-                            embed = Cache.Embeds.FirstOrDefault(kv => kv.Key.Split(' ').All(str => array.Contains(str))).Value;
+                        //if(embed == null)
+                        //{
 
-                            if(embed == null)
-                                embed = Cache.Embeds.MinBy(kv => Compute(kv.Key, search)).Value;
+                        //    var array = search.Split(' ');
+                        //    embed = Cache.Embeds.FirstOrDefault(kv => array.All(str => kv.Key.ToLower().Contains(str))).Value;
 
-                        }
+                        //    if(embed == null)
+                        //        embed = Cache.Embeds.MinBy(kv => Compute(kv.Key, search)).Value;
+
+                        //}
 
                         await message.Channel.SendMessageAsync("", embed: CleanEmbed(embed, isMinimal));
 

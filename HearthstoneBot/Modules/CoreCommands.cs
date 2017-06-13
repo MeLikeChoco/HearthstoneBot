@@ -45,7 +45,7 @@ namespace HearthstoneBot.Modules
                 return;
 
             }
-            else if (length != 1)
+            else if (length == 1)
                 content = "1";
             else
             {
@@ -101,7 +101,7 @@ namespace HearthstoneBot.Modules
                 return;
 
             }
-            else if (length != 1)
+            else if (length == 1)
                 content = "1";
             else
             {

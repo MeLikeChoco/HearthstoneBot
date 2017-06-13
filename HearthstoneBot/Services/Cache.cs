@@ -53,6 +53,7 @@ namespace HearthstoneBot.Services
                 if (!string.IsNullOrEmpty(card.FullArt) 
                 && card.Set.ToLower() != "credits"
                 && card.Set.ToLower() != "tavern brawl"
+                && card.Set.ToLower() != "cheat"
                 && !card.Name.Contains("("))
                     tempFullArts[card.Name] = card.FullArt;
 
@@ -179,6 +180,7 @@ namespace HearthstoneBot.Services
 
         }
 
+        //TODO THINK ABOUT CHANGING COLOR TO REFLECT ON TYPE
         private static Color GetColor(string cardClass)
         {
 

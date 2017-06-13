@@ -26,7 +26,6 @@ namespace HearthstoneBot.Modules
 
         private ISocketMessageChannel _channel;
         private SocketUser _winner;
-        private bool _didGameEnd = false;
         private Timer _timer;
         private string _match;
 
@@ -72,9 +71,8 @@ namespace HearthstoneBot.Modules
             
             if (message.Content.ToLower() == _match.ToLower())
             {
-                
+
                 _winner = message.Author;
-                _didGameEnd = true;
                 Context.Client.MessageReceived -= CompareMessage;
 
                 if (_channel is SocketTextChannel)
@@ -97,8 +95,6 @@ namespace HearthstoneBot.Modules
         private void OnTimeUp(object state)
         {
             
-            _didGameEnd = true;
-
             Context.Client.MessageReceived -= CompareMessage;
             ReplyAsync($":poop: There was no winner! The card was `{_match}`!");
             Cache.GuessGames.TryRemove(_channel.Id, out var blah);

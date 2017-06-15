@@ -12,12 +12,13 @@ namespace HearthstoneBot.Objects
     {
 
         public string Name { get; set; }
-        public string Set { get; set; } = "N/A";
+        public string Set { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public Type Type { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public Race Race { get; set; }
-        public string Class { get; set; } = "N/A";
+        [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
+        public Class[] Class { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public Rarity Rarity { get; set; }
 
@@ -62,6 +63,22 @@ namespace HearthstoneBot.Objects
             Type = type;
 
         }
+
+    }
+
+    public enum Class
+    {
+
+        None,
+        Druid,
+        Hunter,
+        Mage,
+        Paladin,
+        Priest,
+        Rogue,
+        Shaman,
+        Warlock,
+        Warrior
 
     }
 

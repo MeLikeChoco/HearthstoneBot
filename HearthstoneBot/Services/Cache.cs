@@ -79,23 +79,21 @@ namespace HearthstoneBot.Services
         {
 
             var author = new EmbedAuthorBuilder()
-                .WithIconUrl("https://cdn.iconverticons.com/files/png/e374004e6f5ac18b_256x256.png")
-                .WithUrl("http://us.battle.net/hearthstone/en/")
-                .WithName("Hearthstone");
+                .WithIconUrl(GetAuthorIcon(card.Class.FirstOrDefault()))
+                .WithUrl(card.Url)
+                .WithName(card.Name);
 
             var footer = new EmbedFooterBuilder()
                 .WithIconUrl("http://i.imgur.com/zz1Bcek.png")
-                .WithText("Brought to you by The One and Only");
+                .WithText(card.Collectability.ToString());
 
             var body = new EmbedBuilder
             {
 
                 Author = author,
-                Color = GetColor(card.Class),
+                Color = GetColor(card.Class.FirstOrDefault()),
                 ImageUrl = card.FullArt,
                 ThumbnailUrl = card.GoldImage ?? card.RegularImage,
-                Url = card.Url,
-                Title = card.Name,
                 Footer = footer,
 
             };
@@ -156,8 +154,8 @@ namespace HearthstoneBot.Services
             if (card.Type == Objects.Type.Minion)
                 builder.AppendLine($"**Race:** {card.Race}");
 
-            if (card.Class != Check)
-                builder.AppendLine($"**Class:** {card.Class}");
+            if (!card.Class.Contains(Class.None))
+                builder.AppendLine($"**Class:** {string.Join(" / ", card.Class.Select(c => c.ToString()))}");
 
             if (card.Rarity != Rarity.Basic)
                 builder.AppendLine($"**Rarity:** {card.Rarity}");
@@ -181,33 +179,64 @@ namespace HearthstoneBot.Services
         }
 
         //TODO THINK ABOUT CHANGING COLOR TO REFLECT ON TYPE
-        private static Color GetColor(string cardClass)
+        private static Color GetColor(Class cardClass)
         {
 
             switch (cardClass)
             {
 
-                case "Hunter":
+                case Class.Hunter:
                     return new Color(102, 102, 102);
-                case "Priest":
+                case Class.Priest:
                     return new Color(167, 174, 182);
-                case "Warlock":
+                case Class.Warlock:
                     return new Color(78, 50, 88);
-                case "Warrior":
+                case Class.Warrior:
                     return new Color(87, 97, 88);
-                case "Paladin":
+                case Class.Paladin:
                     return new Color(183, 137, 60);
-                case "Druid":
+                case Class.Druid:
                     return new Color(104, 59, 40);
-                case "Mage":
+                case Class.Mage:
                     return new Color(107, 118, 163);
-                case "Shaman":
+                case Class.Shaman:
                     return new Color(50, 53, 96);
-                case "Rogue":
+                case Class.Rogue:
                     return new Color(55, 54, 60);
                 default:
                     return new Color(107, 86, 75);
 
+
+            }
+
+        }
+
+        private static string GetAuthorIcon(Class cardClass)
+        {
+
+            switch (cardClass)
+            {
+
+                case Class.Druid:
+                    return "https://www.burning-crusade.com/wp-content/uploads/2014/05/druid_1.png";
+                case Class.Hunter:
+                    return "http://media-hearth.cursecdn.com/attachments/0/150/hunter_4.png";
+                case Class.Mage:
+                    return "http://media-hearth.cursecdn.com/attachments/0/151/mage_13.png";
+                case Class.Paladin:
+                    return "http://www.deckselect.eu/img/Paladin.png";
+                case Class.Priest:
+                    return "http://media-hearth.cursecdn.com/attachments/0/153/priest_12.png";
+                case Class.Rogue:
+                    return "http://media-hearth.cursecdn.com/attachments/0/154/rogue_8.png";
+                case Class.Shaman:
+                    return "http://media-hearth.cursecdn.com/attachments/0/155/shaman_5.png";
+                case Class.Warlock:
+                    return "http://www.deckselect.eu/img/Warlock.png";
+                case Class.Warrior:
+                    return "http://www.deckselect.eu/img/Warrior.png";
+                default:
+                    return "https://cdn.iconverticons.com/files/png/e374004e6f5ac18b_256x256.png";
 
             }
 

@@ -133,7 +133,7 @@ namespace HearthstoneBot.Objects
 
                 }
 
-                foreach (var cardClass in card.Class.Split(',').Select(str => str.Trim()))
+                foreach (var cardClass in card.Class)
                 {
 
                     CountClass(cardClass);
@@ -288,35 +288,38 @@ namespace HearthstoneBot.Objects
 
         }
 
-        private static void CountClass(string cardClass)
+        private static void CountClass(Class cardClass)
         {
 
             switch (cardClass)
             {
 
-                case "Druid":
+                case Class.Druid:
                     Interlocked.Increment(ref _DruidCardCount);
                     break;
-                case "Hunter":
+                case Class.Hunter:
                     Interlocked.Increment(ref _HunterCardCount);
                     break;
-                case "Mage":
+                case Class.Mage:
                     Interlocked.Increment(ref _MageCardCount);
                     break;
-                case "Paladin":
+                case Class.Paladin:
                     Interlocked.Increment(ref _PaladinCardCount);
                     break;
-                case "Priest":
+                case Class.Priest:
                     Interlocked.Increment(ref _PriestCardCount);
                     break;
-                case "Rogue":
+                case Class.Rogue:
                     Interlocked.Increment(ref _RogueCardCount);
                     break;
-                case "Shaman":
+                case Class.Shaman:
                     Interlocked.Increment(ref _ShamanCardCount);
                     break;
-                case "Warrior":
+                case Class.Warrior:
                     Interlocked.Increment(ref _WarriorCardCount);
+                    break;
+                case Class.Warlock:
+                    Interlocked.Increment(ref _WarlockCardCount);
                     break;
                 default:
                     Interlocked.Increment(ref _NonClassCardCount);

@@ -9,6 +9,7 @@ using MoreLinq;
 using Discord;
 using HearthstoneBot.Objects;
 using Force.DeepCloner;
+using HearthstoneBot.Core;
 
 namespace HearthstoneBot.Services
 {
@@ -32,11 +33,13 @@ namespace HearthstoneBot.Services
                 {
 
                     bool isMinimal;
+                    string guildName = null;
 
                     if (message.Channel is SocketGuildChannel)
                     {
 
                         var guild = (message.Channel as SocketGuildChannel).Guild;
+                        guildName = guild.Name;
                         isMinimal = Settings.GetMinimalSetting(guild.Id);
 
                     }
@@ -48,6 +51,9 @@ namespace HearthstoneBot.Services
 
                         var search = match.Value;
                         search = search.Substring(2, search.Length - 4).ToLower();
+
+                        AltConsole.Print($"{message.Author.Username} from {guildName ?? "DM Channel"} searched for {search}");
+
                         var array = search.Split(' ');
 
                         var embed = Cache.Embeds.FirstOrDefault(kv => kv.Key == search).Value

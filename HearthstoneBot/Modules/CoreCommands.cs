@@ -20,7 +20,7 @@ namespace HearthstoneBot.Modules
         protected override void BeforeExecute()
             => _isMinimal = Settings.GetMinimalSetting(Context.Guild.Id);
 
-        [Command("search"), Alias("s")]
+        [Command("search"), Alias("s", " search")]
         [Summary("Search for cards")]
         public async Task SearchCommand([Remainder]string search)
         {
@@ -76,7 +76,7 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("lsearch"), Alias("ls")]
+        [Command("lsearch"), Alias("ls" , " lsearch")]
         [Summary("Lazily search for cards")]
         public async Task LazySearchCommand([Remainder]string search)
         {
@@ -132,7 +132,7 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("card"), Alias("c")]
+        [Command("card"), Alias("c", " card")]
         [Summary("Search for a card")]
         public async Task CardCommand([Remainder]string search)
         {
@@ -147,7 +147,7 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("lcard"), Alias("lc")]
+        [Command("lcard"), Alias("lc", " lcard")]
         [Summary("Lazily search for a card")]
         public async Task LazyCardCommand([Remainder]string search)
         {
@@ -162,7 +162,7 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("random"), Alias("r")]
+        [Command("random"), Alias("r", " random")]
         [Summary("Get a random card")]
         public async Task RandomCommand()
         {
@@ -182,7 +182,7 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("art"), Alias("a")]
+        [Command("art"), Alias("a", " art")]
         [Summary("Get the full art of a card")]
         public async Task ArtCommand([Remainder]string search)
         {

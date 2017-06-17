@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Addons.InteractiveCommands;
 using Discord.Commands;
+using Discord.WebSocket;
 using HearthstoneBot.Services;
 using System;
 using System.Collections.Generic;
@@ -50,6 +51,26 @@ namespace HearthstoneBot.Modules
 
             await Settings.SetMinimalSetting(Context.Guild.Id, setting);
             await ReplyAsync("Minimal setting has been set to: " + setting);
+
+        }
+
+        [Command("guesschannel")]
+        [Summary("Marks a channel for guess games")]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task GuessChannelCommand(bool setting)
+        {
+
+            if (Settings.IsGuessChannel(Context.Channel as SocketGuildChannel))
+            {
+
+                await ReplyAsync("Channel is already a guess channel!");
+                return;
+
+            }
+
+            await Settings.SetGuessChannel(Context.Channel as SocketGuildChannel);
+            await ReplyAsync("Channel set!");
 
         }
 

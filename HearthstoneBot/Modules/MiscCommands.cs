@@ -33,22 +33,22 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("invite")]
+        [Command("invite"), Alias(" invite")]
         [Summary("Get invite to bot")]
         public async Task InviteCommand()
             => await ReplyAsync("<https://discordapp.com/oauth2/authorize?client_id=312429302283108353&scope=bot&permissions=19457>");
 
-        [Command("ping")]
+        [Command("ping"), Alias(" ping")]
         [Summary("Get the latency between the server and bot")]
         public async Task PingCommand()
             => await ReplyAsync($"The latency between the bot and {Context.Guild.VoiceRegionId} is **{Context.Client.Latency}ms**.");
 
-        [Command("uptime")]
+        [Command("uptime"), Alias(" uptime")]
         [Summary("Get the uptime of the bot")]
         public async Task UptimeCommand()
             => await ReplyAsync(GetUptime());
 
-        [Command("stats")]
+        [Command("stats"), Alias(" stats")]
         [Summary("Get stats on the bot")]
         public async Task StatsCommand()
         {
@@ -93,7 +93,7 @@ namespace HearthstoneBot.Modules
 
         }
 
-        [Command("info")]
+        [Command("info"), Alias(" info")]
         [Summary("Return info on the bot")]
         public async Task InfoCommand()
         {
@@ -176,10 +176,16 @@ namespace HearthstoneBot.Modules
 
             var modules = Context.User.Id == Context.Client.GetApplicationInfoAsync().Result.Owner.Id && Context.Guild.Id == 171432768767524864
                 ? _cmdService.Modules : _cmdService.Modules.Where(m => m.Name != "Utility");
+            var prefix = Context.Channel is SocketDMChannel ? "h^" : Settings.GetPrefix(Context.Guild.Id);
 
-            var builder = new StringBuilder("```css\n" +
-                "The Defacto Help Menu" +
-                $"\n{"-".PadRight(50, '-')}\n");
+            var builder = new StringBuilder("```css" +
+                "\nThe Defacto Help Menu" +
+                $"\n{"-".PadRight(50, '-')}" +
+                $"\nPrefix: {prefix}" +
+                $"\nCapitalization for searches does not matter!" +
+                $"\n{"-".PadRight(50, '-')}");
+
+            builder.AppendLine();
 
             foreach (var module in modules)
             {
@@ -212,7 +218,7 @@ namespace HearthstoneBot.Modules
 
             }
 
-            builder.AppendLine("The bot also supports inline card searches! Ex. \"I like {Armor Plating} and {Stalagg} in Hearthstone!\" " +
+            builder.AppendLine("The bot also supports inline card searches! Ex. \"I like {{Armor Plating}} and {{Stalagg}} in Hearthstone!\" " +
                 "will search out Armor Plating and Stalagg! That's right, it can do multiple card searches at once!");
             builder.Append($"{"-".PadRight(50, '-')}```");
 

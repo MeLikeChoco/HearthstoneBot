@@ -75,6 +75,59 @@ namespace HearthstoneBot.Services
 
         }
 
+        public static async Task SetGuessChannel(SocketGuildChannel channel)
+        {
+
+            var setting = _guildSettings[channel.Guild.Id];
+
+            if (setting.GuessChannels.Contains(channel.Id))
+                return;
+
+            setting.AddGuessChannel(channel.Id);
+
+            _guildSettings[channel.Guild.Id] = setting;
+
+            using (var connection = new SqliteConnection(DbPath))
+            {
+
+                await connection.OpenAsync();
+
+                await connection.UpdateAsync(setting);
+
+                connection.Close();
+
+            }
+
+        }
+
+        public static bool IsGuessChannel(SocketGuildChannel channel)
+        {
+
+            var setting = _guildSettings[channel.Guild.Id];
+
+            if (setting.GuessChannels.Contains(channel.Id))
+                return true;
+            else
+                return false;
+
+        }
+
+        public static async Task SendSqlStatement(string statement)
+        {
+
+            using (var connection = new SqliteConnection(DbPath))
+            {
+
+                await connection.OpenAsync();
+
+                await connection.ExecuteAsync(statement);
+
+                connection.Close();
+
+            }
+
+        }
+
         public static async Task CreateSettings(SocketGuild guild)
         {
 

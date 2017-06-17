@@ -131,7 +131,8 @@ namespace HearthstoneBot.Objects
 
         Summoned,
         Generated,
-        Transformed
+        Transformed,
+        Chosen
 
     }
 

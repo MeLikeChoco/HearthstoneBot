@@ -34,6 +34,9 @@ namespace HearthstoneBot.Modules
         public async Task GuessCommand()
         {
 
+            if (!(Context.Channel is SocketDMChannel) && !Settings.IsGuessChannel(Context.Channel as SocketGuildChannel))
+                return;
+
             if (Cache.GuessGames.ContainsKey(_channel.Id))
             {
 
@@ -53,7 +56,18 @@ namespace HearthstoneBot.Modules
 
                 var stream = await Web.GetImage(kv.Value);
 
-                await Context.Channel.SendFileAsync(stream, "jpg", ":card_index: A guessing game has begun! What card is this? You have 60 seconds!");
+                try
+                {
+
+                    await Context.Channel.SendFileAsync(stream, "jpg", ":card_index: A guessing game has begun! What card is this? You have 60 seconds!");
+
+                }
+                catch
+                {
+
+                    await ReplyAsync("It seems you have disabled attach files for the bot! Please enable for picture uploading to work!");
+
+                }
 
             }
 

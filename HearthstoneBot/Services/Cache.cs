@@ -55,7 +55,20 @@ namespace HearthstoneBot.Services
                 && card.Set.ToLower() != "tavern brawl"
                 && card.Set.ToLower() != "cheat"
                 && !card.Name.Contains("("))
-                    tempFullArts[card.Name] = card.FullArt;
+                {
+
+                    if(card.Source == null)
+                        tempFullArts[card.Name] = card.FullArt;
+                    else
+                    {
+
+                        if(card.Source.Type != SourceType.Generated)
+                            tempFullArts[card.Name] = card.FullArt;
+
+                    }
+
+                }
+                    
 
                 tempDict[cardName] = embed;
                 tempList.Add(card.Name);
@@ -124,6 +137,9 @@ namespace HearthstoneBot.Services
                     case SourceType.Transformed:
                         body.AddField("Transformed by", string.Join(" / ", card.Source.Sources));
                         break;
+                    case SourceType.Chosen:
+                        body.AddField("Chosen from", string.Join(" / ", card.Source.Sources));
+                        break;
 
                 }
 
@@ -172,8 +188,6 @@ namespace HearthstoneBot.Services
             if (!string.IsNullOrEmpty(card.Durability))
                 builder.AppendLine($"**Durability:** {card.Durability}");
 
-            builder.AppendLine($"**Collectibility:** {card.Collectability}");
-
             return builder.ToString();
 
         }
@@ -205,7 +219,6 @@ namespace HearthstoneBot.Services
                     return new Color(55, 54, 60);
                 default:
                     return new Color(107, 86, 75);
-
 
             }
 

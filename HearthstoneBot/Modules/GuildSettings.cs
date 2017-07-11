@@ -61,16 +61,37 @@ namespace HearthstoneBot.Modules
         public async Task GuessChannelCommand(bool setting)
         {
 
-            if (Settings.IsGuessChannel(Context.Channel as SocketGuildChannel))
+            var channel = Context.Channel as SocketGuildChannel;
+            var isGuessChannel = Settings.IsGuessChannel(channel);
+
+            if (setting)
             {
 
-                await ReplyAsync("Channel is already a guess channel!");
-                return;
+                if (isGuessChannel)
+                    await ReplyAsync("Channel is already a guess channel!");
+                else
+                {
+
+                    await Settings.SetGuessChannel(channel);
+                    await ReplyAsync("Channel set!");
+
+                }
 
             }
+            else
+            {
 
-            await Settings.SetGuessChannel(Context.Channel as SocketGuildChannel);
-            await ReplyAsync("Channel set!");
+                if (!isGuessChannel)
+                    await ReplyAsync("The channel is not a guess channel!");
+                else
+                {
+
+                    await Settings.RemoveGuessChannel(channel);
+                    await ReplyAsync("Channel removed!");
+
+                }
+
+            }
 
         }
 

@@ -50,25 +50,21 @@ namespace HearthstoneBot.Services
                 var embed = GenerateEmbed(card);
                 var cardName = card.Name.ToLower();
 
-                if (!string.IsNullOrEmpty(card.FullArt) 
+                if (!string.IsNullOrEmpty(card.FullArt)
                 && card.Set.ToLower() != "credits"
                 && card.Set.ToLower() != "tavern brawl"
                 && card.Set.ToLower() != "cheat"
                 && !card.Name.Contains("("))
                 {
 
-                    if(card.Source == null)
+                    if (card.Source == null)
                         tempFullArts[card.Name] = card.FullArt;
-                    else
-                    {
-
-                        if(card.Source.Type != SourceType.Generated)
-                            tempFullArts[card.Name] = card.FullArt;
-
-                    }
+                    else if (card.Source.Type != SourceType.Generated
+                    && card.Source.Type != SourceType.Chosen)
+                        tempFullArts[card.Name] = card.FullArt;
 
                 }
-                    
+
 
                 tempDict[cardName] = embed;
                 tempList.Add(card.Name);
@@ -77,7 +73,7 @@ namespace HearthstoneBot.Services
                 Log($"Progress: {Interlocked.Increment(ref counter)}/{totalAmount}");
 
             });
-                        
+
             CardNames = new HashSet<string>(tempList);
             LowerCardNames = new HashSet<string>(lowerTempList);
             Embeds = tempDict.ToDictionary();
@@ -92,21 +88,31 @@ namespace HearthstoneBot.Services
         {
 
             var author = new EmbedAuthorBuilder()
-                .WithIconUrl(GetAuthorIcon(card.Class.FirstOrDefault()))
-                .WithUrl(card.Url)
+                .WithIconUrl(new Uri(GetAuthorIcon(card.Class.FirstOrDefault())))
+                .WithUrl(new Uri(card.Url))
                 .WithName(card.Name);
 
             var footer = new EmbedFooterBuilder()
-                .WithIconUrl("http://i.imgur.com/zz1Bcek.png")
+                .WithIconUrl(new Uri("http://i.imgur.com/zz1Bcek.png"))
                 .WithText(card.Collectability.ToString());
+
+            var fullArtUri = string.IsNullOrEmpty(card.FullArt) ? null : new Uri(card.FullArt);
+            Uri thumbnailUri;
+
+            if (string.IsNullOrEmpty(card.GoldImage ?? card.RegularImage)) //stupid little trick
+                thumbnailUri = null;
+            else if (!string.IsNullOrEmpty(card.GoldImage))
+                thumbnailUri = new Uri(card.GoldImage);
+            else
+                thumbnailUri = new Uri(card.RegularImage);
 
             var body = new EmbedBuilder
             {
 
                 Author = author,
                 Color = GetColor(card.Class.FirstOrDefault()),
-                ImageUrl = card.FullArt,
-                ThumbnailUrl = card.GoldImage ?? card.RegularImage,
+                ImageUrl = fullArtUri,
+                ThumbnailUrl = thumbnailUri,
                 Footer = footer,
 
             };
@@ -120,7 +126,13 @@ namespace HearthstoneBot.Services
                 body.AddField("Lore", card.Lore);
 
             if (!string.IsNullOrEmpty(card.Aquisition))
-                body.AddField("Aquisition", card.Aquisition);
+            {
+
+                var aquisition = card.Aquisition.Length > 1024 ? card.Aquisition.Substring(0, 1024) : card.Aquisition;
+
+                body.AddField("Aquisition", aquisition);
+
+            }
 
             if (card.Source != null)
             {

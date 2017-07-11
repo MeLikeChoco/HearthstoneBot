@@ -59,7 +59,7 @@ namespace HearthstoneBot.Modules
                 try
                 {
 
-                    await Context.Channel.SendFileAsync(stream, "jpg", ":card_index: A guessing game has begun! What card is this? You have 60 seconds!");
+                    await Context.Channel.SendFileAsync(stream, $"{kv.Key}.png", ":card_index: A guessing game has begun! What card is this? You have 60 seconds!");
 
                 }
                 catch

@@ -15,7 +15,9 @@ namespace HearthstoneBot.Objects
         [ExplicitKey]
         public ulong Id { get; set; }
         public string Prefix { get; set; }
-        public bool IsMinimal { get; set; }
+        public bool IsMinimal { get; set; }        
+        public string GuessChannelsString { get; set; }
+
         [Computed, Write(false)]
         public List<ulong> GuessChannels
         {
@@ -25,15 +27,6 @@ namespace HearthstoneBot.Objects
             }
         }
 
-        private string GuessChannelsString { get; set; }
-
-        public GuildSetting()
-        {
-
-            GuessChannelsString = "0";
-
-        }
-
         public void AddGuessChannel(ulong id)
         {
 
@@ -41,6 +34,16 @@ namespace HearthstoneBot.Objects
                 GuessChannelsString = GuessChannelsString.Replace("0", id.ToString());
             else
                 GuessChannelsString += $"/{id}";
+
+        }
+
+        public void RemoveGuessChannel(ulong id)
+        {
+
+            GuessChannelsString = GuessChannelsString.Replace($"{id}", string.Empty).Replace("//", "/");
+
+            if (string.IsNullOrEmpty(GuessChannelsString))
+                GuessChannelsString = "0";
 
         }
 

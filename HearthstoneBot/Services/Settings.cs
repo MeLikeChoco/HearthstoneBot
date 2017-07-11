@@ -85,7 +85,28 @@ namespace HearthstoneBot.Services
 
             setting.AddGuessChannel(channel.Id);
 
-            _guildSettings[channel.Guild.Id] = setting;
+            using (var connection = new SqliteConnection(DbPath))
+            {
+
+                await connection.OpenAsync();
+
+                await connection.UpdateAsync(setting);
+
+                connection.Close();
+
+            }
+
+        }
+
+        public static async Task RemoveGuessChannel(SocketGuildChannel channel)
+        {
+
+            var setting = _guildSettings[channel.Guild.Id];
+
+            if (!setting.GuessChannels.Contains(channel.Id))
+                return;
+
+            setting.RemoveGuessChannel(channel.Id);
 
             using (var connection = new SqliteConnection(DbPath))
             {
@@ -131,31 +152,42 @@ namespace HearthstoneBot.Services
         public static async Task CreateSettings(SocketGuild guild)
         {
 
-            using (var connection = new SqliteConnection(DbPath))
+            try
             {
 
-                await connection.OpenAsync();
-
-                var possibleEntry = await connection.ExecuteScalarAsync<ulong>("select Id from GuildSettings where Id = @Id", new { Id = guild.Id });
-
-                if (possibleEntry == 0)
+                using (var connection = new SqliteConnection(DbPath))
                 {
 
-                    var setting = new GuildSetting
+                    await connection.OpenAsync();
+
+                    var possibleEntry = await connection.ExecuteScalarAsync<ulong>("select Id from GuildSettings where Id = @Id", new { Id = guild.Id });
+
+                    if (possibleEntry == 0)
                     {
 
-                        Id = guild.Id,
-                        Prefix = DefaultPrefix,
-                        IsMinimal = false,
+                        var setting = new GuildSetting
+                        {
 
-                    };
+                            Id = guild.Id,
+                            Prefix = DefaultPrefix,
+                            IsMinimal = false,
+                            GuessChannelsString = "0",
 
-                    await connection.InsertAsync(setting);
-                    _guildSettings[guild.Id] = setting;
+                        };
+
+                        await connection.InsertAsync(setting);
+                        _guildSettings[guild.Id] = setting;
+
+                    }
+
+                    connection.Close();
 
                 }
 
-                connection.Close();
+            }catch(Exception e)
+            {
+
+                Console.WriteLine(e.StackTrace);
 
             }
 

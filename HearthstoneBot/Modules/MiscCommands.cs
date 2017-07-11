@@ -62,7 +62,7 @@ namespace HearthstoneBot.Modules
                     var appinfo = await Context.Client.GetApplicationInfoAsync();
 
                     var author = new EmbedAuthorBuilder()
-                        .WithIconUrl(appinfo.IconUrl)
+                        .WithIconUrl(new Uri(appinfo.IconUrl))
                         .WithName(Context.Client.CurrentUser.Username);
 
                     var footer = new EmbedFooterBuilder()
@@ -108,7 +108,7 @@ namespace HearthstoneBot.Modules
 
                 var author = new EmbedAuthorBuilder()
                     .WithName(appInfo.Name)
-                    .WithUrl("https://github.com/MeLikeChoco/HearthstoneBot");
+                    .WithUrl(new Uri("https://github.com/MeLikeChoco/HearthstoneBot"));
 
                 var footer = new EmbedFooterBuilder()
                     .WithText($"Made by {owner.Username}");
@@ -124,7 +124,7 @@ namespace HearthstoneBot.Modules
                     $"\n**Library:** Discord.NET {DiscordConfig.Version}" +
                     $"\n**Uptime:** {GetUptime()}" +
                     $"\n**Latency:** {Context.Client.Latency}ms")
-                    .WithThumbnailUrl(appInfo.IconUrl);
+                    .WithThumbnailUrl(new Uri(appInfo.IconUrl));
 
                 await ReplyAsync("", embed: body);
 
@@ -143,11 +143,11 @@ namespace HearthstoneBot.Modules
 
             var author = new EmbedAuthorBuilder()
                 .WithName(sender.Username)
-                .WithIconUrl(sender.GetAvatarUrl());
+                .WithIconUrl(new Uri(sender.GetAvatarUrl()));
 
             var footer = new EmbedFooterBuilder()
                 .WithText($"{guild.Name} | {guild.Id}")
-                .WithIconUrl(guild.IconUrl);
+                .WithIconUrl(new Uri(guild.IconUrl));
 
             var body = new EmbedBuilder()
                 .WithColor(Rand.GetRandomColor())
